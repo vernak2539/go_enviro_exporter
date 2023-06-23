@@ -32,13 +32,17 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 	}
 
 	return &environmentMetricCollector{
-		proximity: prometheus.NewDesc(prometheus.BuildFQName(namespace, "", "proximity"),
-			"Proximity metric",
-			[]string{"name", "path"}, nil,
+		proximity: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "proximity"),
+			"proximity, with larger numbers being closer proximity and vice versa",
+			[]string{},
+			nil,
 		),
-		lux: prometheus.NewDesc(prometheus.BuildFQName(namespace, "", "lux"),
-			"Lux metric",
-			[]string{"name", "path"}, nil,
+		lux: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "lux"),
+			"current ambient light level (lux)",
+			[]string{}, // labels added here if needed
+			nil,
 		),
 		sensors: sensors,
 	}
@@ -60,12 +64,13 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 		panic(err)
 	}
 
+	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
 }
 
 var (
-	listenAddress = flag.String("web.listen-address", ":8765", "Address to listen on for web interface.")
+	listenAddress = flag.String("web.listen-address", ":xf", "Address to listen on for web interface.")
 	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
 )
 
