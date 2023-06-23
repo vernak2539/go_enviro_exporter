@@ -71,7 +71,7 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 }
 
 var (
-	listenAddress = flag.String("web.listen-address", ":xf", "Address to listen on for web interface.")
+	listenAddress = flag.String("web.listen-address", ":7100", "Address to listen on for web interface.")
 	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
 )
 
