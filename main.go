@@ -8,18 +8,46 @@ import (
 	"github.com/rubiojr/go-enviroplus/ltr559"
 	"log"
 	"net/http"
+	"periph.io/x/conn/v3/i2c/i2creg"
+	"periph.io/x/conn/v3/physic"
+	"periph.io/x/devices/v3/bmxx80"
+	"periph.io/x/host/v3"
 )
 
 const namespace = ""
 
+func initBmxSensor() *bmxx80.Dev {
+	if _, err := host.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Use i2creg I²C bus registry to find the first available I²C bus.
+	b, err := i2creg.Open("")
+	if err != nil {
+		log.Fatalf("failed to open I²C: %v", err)
+	}
+	defer b.Close()
+
+	d, err := bmxx80.NewI2C(b, 0x76, &bmxx80.DefaultOpts)
+	if err != nil {
+		log.Fatalf("failed to initialize bme280: %v", err)
+	}
+
+	return d
+}
+
 type sensors struct {
 	ltr559 *ltr559.LTR559
+	bmxx80 *bmxx80.Dev
 }
 
 type environmentMetricCollector struct {
-	proximity *prometheus.Desc
-	lux       *prometheus.Desc
-	sensors   sensors
+	proximity   *prometheus.Desc
+	lux         *prometheus.Desc
+	pressure    *prometheus.Desc
+	humidity    *prometheus.Desc
+	temperature *prometheus.Desc
+	sensors     sensors
 }
 
 func newEnvironmentMetricCollector() *environmentMetricCollector {
@@ -30,6 +58,7 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 
 	sensors := sensors{
 		ltr559: ltr559Sensor,
+		bmxx80: initBmxSensor(),
 	}
 
 	return &environmentMetricCollector{
@@ -45,6 +74,24 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 			[]string{}, // labels added here if needed
 			nil,
 		),
+		pressure: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "pressure"),
+			"pressure Pressure measured (hPa)",
+			[]string{}, // labels added here if needed
+			nil,
+		),
+		humidity: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "humidity"),
+			"humidity Relative humidity measured (%)",
+			[]string{}, // labels added here if needed
+			nil,
+		),
+		temperature: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "temperature"),
+			"temperature Temperature measured (*C)",
+			[]string{}, // labels added here if needed
+			nil,
+		),
 		sensors: sensors,
 	}
 }
@@ -52,6 +99,9 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.proximity
 	ch <- c.lux
+	ch <- c.pressure
+	ch <- c.humidity
+	ch <- c.temperature
 }
 
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
@@ -65,9 +115,17 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 		panic(err)
 	}
 
+	bmxData := physic.Env{}
+	if err := c.sensors.bmxx80.Sense(&bmxData); err != nil {
+		log.Fatal(err)
+	}
+
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
+	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, float64(bmxData.Pressure))
+	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, float64(bmxData.Humidity))
+	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, bmxData.Temperature.Celsius())
 }
 
 var (
@@ -76,6 +134,7 @@ var (
 )
 
 func main() {
+
 	flag.Parse()
 
 	collector := newEnvironmentMetricCollector()
