@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rubiojr/go-enviroplus/ltr559"
@@ -80,7 +81,7 @@ func main() {
 	collector := newEnvironmentMetricCollector()
 	prometheus.MustRegister(collector)
 
-	http.Handle("/metrics", promhttp.Handler())
+	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
              <head><title>Enviro Exporter Metrics</title></head>
@@ -91,5 +92,6 @@ func main() {
              </html>`))
 	})
 
+	fmt.Printf("listening at http://localhost:%s%s", *listenAddress, *metricsPath)
 	log.Fatal(http.ListenAndServe(*listenAddress, nil))
 }
