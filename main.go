@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rubiojr/go-enviroplus/ltr559"
+	"log"
 	"net/http"
 )
 
@@ -62,20 +64,27 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
 }
 
-var metricsPath = "/metrics"
+var (
+	listenAddress = flag.String("web.listen-address", ":8765", "Address to listen on for web interface.")
+	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
+)
 
 func main() {
+	flag.Parse()
+
 	collector := newEnvironmentMetricCollector()
 	prometheus.MustRegister(collector)
 
 	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
-             <head><title>Mirth Channel Exporter</title></head>
+             <head><title>Enviro Exporter Metrics</title></head>
              <body>
-             <h1>Mirth Channel Exporter</h1>
-             <p><a href='` + metricsPath + `'>Metrics</a></p>
+             <h1>Enviro Exporter</h1>
+             <p><a href='` + *metricsPath + `'>Metrics</a></p>
              </body>
              </html>`))
 	})
+
+	log.Fatal(http.ListenAndServe(*listenAddress, nil))
 }
