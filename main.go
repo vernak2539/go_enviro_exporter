@@ -8,6 +8,7 @@ import (
 	"github.com/rubiojr/go-enviroplus/ltr559"
 	"log"
 	"net/http"
+	"periph.io/x/periph/conn/i2c"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
 	"periph.io/x/periph/devices/bmxx80"
@@ -16,7 +17,7 @@ import (
 
 const namespace = ""
 
-func initBmxSensor() *bmxx80.Dev {
+func initBmxSensor() (*bmxx80.Dev, i2c.BusCloser) {
 	if _, err := host.Init(); err != nil {
 		log.Fatal(err)
 	}
@@ -26,19 +27,19 @@ func initBmxSensor() *bmxx80.Dev {
 	if err != nil {
 		log.Fatalf("failed to open I²C: %v", err)
 	}
-	defer b.Close()
 
 	d, err := bmxx80.NewI2C(b, 0x76, &bmxx80.DefaultOpts)
 	if err != nil {
 		log.Fatalf("failed to initialize bme280: %v", err)
 	}
 
-	return d
+	return d, b
 }
 
 type sensors struct {
 	ltr559 *ltr559.LTR559
 	bmxx80 *bmxx80.Dev
+	i2cBc  i2c.BusCloser
 }
 
 type environmentMetricCollector struct {
@@ -56,9 +57,12 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 		panic(err)
 	}
 
+	bmxx80Sensor, i2cBusCloser := initBmxSensor()
+
 	sensors := sensors{
 		ltr559: ltr559Sensor,
-		bmxx80: initBmxSensor(),
+		bmxx80: bmxx80Sensor,
+		i2cBc:  i2cBusCloser,
 	}
 
 	return &environmentMetricCollector{
@@ -134,10 +138,11 @@ var (
 )
 
 func main() {
-
 	flag.Parse()
 
 	collector := newEnvironmentMetricCollector()
+	defer collector.sensors.i2cBc.Close()
+
 	prometheus.MustRegister(collector)
 
 	http.Handle(*metricsPath, promhttp.Handler())
