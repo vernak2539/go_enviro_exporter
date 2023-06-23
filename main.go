@@ -6,6 +6,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rubiojr/go-enviroplus/ltr559"
+	"github.com/rubiojr/go-enviroplus/pms5003"
 	"log"
 	"net/http"
 	"periph.io/x/periph/conn/i2c"
@@ -37,9 +38,10 @@ func initBmxSensor() (*bmxx80.Dev, i2c.BusCloser) {
 }
 
 type sensors struct {
-	ltr559 *ltr559.LTR559
-	bmxx80 *bmxx80.Dev
-	i2cBc  i2c.BusCloser
+	ltr559  *ltr559.LTR559
+	bmxx80  *bmxx80.Dev
+	i2cBc   i2c.BusCloser
+	pms5003 *pms5003.Device
 }
 
 type environmentMetricCollector struct {
@@ -48,6 +50,7 @@ type environmentMetricCollector struct {
 	pressure    *prometheus.Desc
 	humidity    *prometheus.Desc
 	temperature *prometheus.Desc
+	pm1         *prometheus.Desc
 	sensors     sensors
 }
 
@@ -59,10 +62,20 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 
 	bmxx80Sensor, i2cBusCloser := initBmxSensor()
 
+	pms5003Sensor, err := pms5003.New()
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		pms5003Sensor.StartReading()
+	}()
+
 	sensors := sensors{
-		ltr559: ltr559Sensor,
-		bmxx80: bmxx80Sensor,
-		i2cBc:  i2cBusCloser,
+		ltr559:  ltr559Sensor,
+		bmxx80:  bmxx80Sensor,
+		i2cBc:   i2cBusCloser,
+		pms5003: pms5003Sensor,
 	}
 
 	return &environmentMetricCollector{
@@ -96,6 +109,12 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 			[]string{}, // labels added here if needed
 			nil,
 		),
+		pm1: prometheus.NewDesc(
+			prometheus.BuildFQName(namespace, "", "PM1"),
+			"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
+			[]string{}, // labels added here if needed
+			nil,
+		),
 		sensors: sensors,
 	}
 }
@@ -106,6 +125,7 @@ func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.pressure
 	ch <- c.humidity
 	ch <- c.temperature
+	ch <- c.pm1
 }
 
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
@@ -129,12 +149,15 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	// convert from nano pascal to hectopascal
 	pressure := bmxData.Pressure / (physic.KiloPascal / 10)
 
+	pm := c.sensors.pms5003.LastValue()
+
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
 	ch <- prometheus.MustNewConstMetric(c.pressure, prometheus.GaugeValue, float64(pressure))
 	ch <- prometheus.MustNewConstMetric(c.humidity, prometheus.GaugeValue, float64(humidity))
 	ch <- prometheus.MustNewConstMetric(c.temperature, prometheus.GaugeValue, bmxData.Temperature.Celsius())
+	ch <- prometheus.MustNewConstMetric(c.pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
 }
 
 var (
