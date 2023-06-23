@@ -8,10 +8,10 @@ import (
 	"github.com/rubiojr/go-enviroplus/ltr559"
 	"log"
 	"net/http"
-	"periph.io/x/conn/v3/i2c/i2creg"
-	"periph.io/x/conn/v3/physic"
-	"periph.io/x/devices/v3/bmxx80"
-	"periph.io/x/host/v3"
+	"periph.io/x/periph/conn/i2c/i2creg"
+	"periph.io/x/periph/conn/physic"
+	"periph.io/x/periph/devices/bmxx80"
+	"periph.io/x/periph/host"
 )
 
 const namespace = ""
