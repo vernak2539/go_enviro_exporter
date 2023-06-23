@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-const namespace = "enviro"
+const namespace = ""
 
 type sensors struct {
 	ltr559 *ltr559.LTR559
