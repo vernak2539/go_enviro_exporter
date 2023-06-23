@@ -144,18 +144,18 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 		log.Fatal(err)
 	}
 
-	//humidity := bmxData.Humidity / physic.MilliRH
-	//
-	//// convert from nano pascal to hectopascal
-	//pressure := bmxData.Pressure / (physic.KiloPascal / 10)
+	humidity := float64(bmxData.Humidity) / float64(physic.MilliRH)
+
+	// convert from nano pascal to hectopascal
+	pressure := float64(bmxData.Pressure) / float64(physic.KiloPascal / 10)
 
 	pm := c.sensors.pms5003.LastValue()
 
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
-	ch <- prometheus.MustNewConstMetric(c.pressure, prometheus.GaugeValue, float64(bmxData.Pressure))
-	ch <- prometheus.MustNewConstMetric(c.humidity, prometheus.GaugeValue, float64(bmxData.Humidity))
+	ch <- prometheus.MustNewConstMetric(c.pressure, prometheus.GaugeValue, pressure)
+	ch <- prometheus.MustNewConstMetric(c.humidity, prometheus.GaugeValue, humidity)
 	ch <- prometheus.MustNewConstMetric(c.temperature, prometheus.GaugeValue, bmxData.Temperature.Celsius())
 	ch <- prometheus.MustNewConstMetric(c.pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
 }
