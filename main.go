@@ -92,6 +92,6 @@ func main() {
              </html>`))
 	})
 
-	fmt.Printf("listening at http://localhost:%s%s", *listenAddress, *metricsPath)
+	fmt.Printf("listening at http://localhost%s%s", *listenAddress, *metricsPath)
 	log.Fatal(http.ListenAndServe(*listenAddress, nil))
 }
