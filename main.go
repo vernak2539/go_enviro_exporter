@@ -127,9 +127,9 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
-	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, float64(bmxData.Pressure))
-	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, float64(bmxData.Humidity))
-	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, bmxData.Temperature.Celsius())
+	ch <- prometheus.MustNewConstMetric(c.pressure, prometheus.GaugeValue, float64(bmxData.Pressure))
+	ch <- prometheus.MustNewConstMetric(c.humidity, prometheus.GaugeValue, float64(bmxData.Humidity))
+	ch <- prometheus.MustNewConstMetric(c.temperature, prometheus.GaugeValue, bmxData.Temperature.Celsius())
 }
 
 var (
