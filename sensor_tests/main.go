@@ -1,4 +1,4 @@
-package sensor_tests
+package main
 
 import (
 	"fmt"
@@ -31,10 +31,12 @@ func main() {
 	if err := d.Sense(&e); err != nil {
 		log.Fatal(err)
 	}
+
 	for {
-		fmt.Printf("    temp: %8s", e.Temperature)
-		fmt.Printf("pressure: %10s", e.Pressure)
-		fmt.Printf("humidity: %9s", e.Humidity)
+		fmt.Printf("    temp: %8s\n", e.Temperature)
+		fmt.Printf("pressure: %10s\n", e.Pressure)
+		fmt.Printf("humidity: %9s\n", e.Humidity)
+		fmt.Println()
 		time.Sleep(1 * time.Second)
 	}
 }
