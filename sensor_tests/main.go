@@ -34,7 +34,7 @@ func main() {
 			log.Fatal(err)
 		}
 
-		fmt.Print("    temp: ", int64(e.Temperature))
+		fmt.Print("    temp: ", e.Temperature.Celsius())
 		fmt.Println()
 
 		pressure := float64(e.Pressure) / float64(physic.KiloPascal/10)
