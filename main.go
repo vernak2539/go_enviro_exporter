@@ -9,7 +9,6 @@ import (
 	"github.com/rubiojr/go-enviroplus/pms5003"
 	"log"
 	"net/http"
-	"periph.io/x/periph/conn/i2c"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
 	"periph.io/x/periph/devices/bmxx80"
@@ -17,31 +16,9 @@ import (
 	"reflect"
 )
 
-const namespace = ""
-
-func initBmxSensor() (*bmxx80.Dev, i2c.BusCloser) {
-	if _, err := host.Init(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Use i2creg I²C bus registry to find the first available I²C bus.
-	b, err := i2creg.Open("")
-	if err != nil {
-		log.Fatalf("failed to open I²C: %v", err)
-	}
-
-	d, err := bmxx80.NewI2C(b, 0x76, &bmxx80.DefaultOpts)
-	if err != nil {
-		log.Fatalf("failed to initialize bme280: %v", err)
-	}
-
-	return d, b
-}
-
 type sensors struct {
 	ltr559  *ltr559.LTR559
 	bmxx80  *bmxx80.Dev
-	i2cBc   i2c.BusCloser
 	pms5003 *pms5003.Device
 }
 
@@ -60,6 +37,8 @@ type environmentMetricCollector struct {
 }
 
 func newEnvironmentMetricCollector(sensors sensors) *environmentMetricCollector {
+	const namespace = ""
+
 	return &environmentMetricCollector{
 		sensors: sensors,
 		metrics: metrics{
@@ -149,37 +128,64 @@ var (
 	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
 )
 
-func main() {
-	flag.Parse()
-
-	ltr559Sensor, err := ltr559.New()
+func initLightProximitySensor() *ltr559.LTR559 {
+	sensor, err := ltr559.New()
 	if err != nil {
 		panic(err)
 	}
 
-	bmxx80Sensor, i2cBusCloser := initBmxSensor()
+	return sensor
+}
 
-	pms5003Sensor, err := pms5003.New()
+func initBmeSensor() (*bmxx80.Dev, func() error) {
+	if _, err := host.Init(); err != nil {
+		log.Fatal(err)
+	}
+
+	// Use i2creg I²C bus registry to find the first available I²C bus.
+	b, err := i2creg.Open("")
+	if err != nil {
+		log.Fatalf("failed to open I²C: %v", err)
+	}
+
+	sensor, err := bmxx80.NewI2C(b, 0x76, &bmxx80.DefaultOpts)
+	if err != nil {
+		log.Fatalf("failed to initialize bme280: %v", err)
+	}
+
+	return sensor, b.Close
+}
+
+func initPmsSensor() *pms5003.Device {
+	sensor, err := pms5003.New()
 	if err != nil {
 		panic(err)
 	}
 
 	go func() {
-		pms5003Sensor.StartReading()
+		sensor.StartReading()
 	}()
 
+	return sensor
+}
+
+func main() {
+	flag.Parse()
+
+	ltrSensor := initLightProximitySensor()
+	pmsSensor := initPmsSensor()
+	bmeSensor, bmxCleanUp := initBmeSensor()
+	defer bmxCleanUp()
+
 	sensors := sensors{
-		ltr559:  ltr559Sensor,
-		bmxx80:  bmxx80Sensor,
-		i2cBc:   i2cBusCloser,
-		pms5003: pms5003Sensor,
+		ltr559:  ltrSensor,
+		bmxx80:  bmeSensor,
+		pms5003: pmsSensor,
 	}
 
 	collector := newEnvironmentMetricCollector(sensors)
-	defer i2cBusCloser.Close()
 
 	prometheus.MustRegister(collector)
-
 	http.Handle(*metricsPath, promhttp.Handler())
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(`<html>
