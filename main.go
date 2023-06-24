@@ -14,6 +14,7 @@ import (
 	"periph.io/x/periph/conn/physic"
 	"periph.io/x/periph/devices/bmxx80"
 	"periph.io/x/periph/host"
+	"reflect"
 )
 
 const namespace = ""
@@ -44,17 +45,113 @@ type sensors struct {
 	pms5003 *pms5003.Device
 }
 
-type environmentMetricCollector struct {
+type metrics struct {
 	proximity   *prometheus.Desc
 	lux         *prometheus.Desc
 	pressure    *prometheus.Desc
 	humidity    *prometheus.Desc
 	temperature *prometheus.Desc
 	pm1         *prometheus.Desc
-	sensors     sensors
 }
 
-func newEnvironmentMetricCollector() *environmentMetricCollector {
+type environmentMetricCollector struct {
+	metrics metrics
+	sensors sensors
+}
+
+func newEnvironmentMetricCollector(sensors sensors) *environmentMetricCollector {
+	return &environmentMetricCollector{
+		sensors: sensors,
+		metrics: metrics{
+			proximity: prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, "", "proximity"),
+				"proximity, with larger numbers being closer proximity and vice versa",
+				[]string{},
+				nil,
+			),
+			lux: prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, "", "lux"),
+				"current ambient light level (lux)",
+				[]string{}, // labels added here if needed
+				nil,
+			),
+			pressure: prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, "", "pressure"),
+				"pressure Pressure measured (hPa)",
+				[]string{}, // labels added here if needed
+				nil,
+			),
+			humidity: prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, "", "humidity"),
+				"humidity Relative humidity measured (%)",
+				[]string{}, // labels added here if needed
+				nil,
+			),
+			temperature: prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, "", "temperature"),
+				"temperature Temperature measured (*C)",
+				[]string{}, // labels added here if needed
+				nil,
+			),
+			pm1: prometheus.NewDesc(
+				prometheus.BuildFQName(namespace, "", "PM1"),
+				"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
+				[]string{}, // labels added here if needed
+				nil,
+			),
+		},
+	}
+}
+
+func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
+	v := reflect.ValueOf(c.metrics)
+	values := make([]*prometheus.Desc, v.NumField())
+
+	for _, metric := range values {
+		ch <- metric
+	}
+}
+
+func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
+	proximity, err := c.sensors.ltr559.Proximity()
+	if err != nil {
+		panic(err)
+	}
+
+	lux, err := c.sensors.ltr559.Lux()
+	if err != nil {
+		panic(err)
+	}
+
+	bmxData := physic.Env{}
+	if err := c.sensors.bmxx80.Sense(&bmxData); err != nil {
+		log.Fatal(err)
+	}
+
+	humidity := float64(bmxData.Humidity) / float64(physic.MilliRH)
+
+	// convert from nano pascal to hectopascal
+	pressure := float64(bmxData.Pressure) / float64(physic.KiloPascal/100)
+
+	pm := c.sensors.pms5003.LastValue()
+
+	// labels added here if needed
+	ch <- prometheus.MustNewConstMetric(c.metrics.proximity, prometheus.GaugeValue, proximity)
+	ch <- prometheus.MustNewConstMetric(c.metrics.lux, prometheus.GaugeValue, lux)
+	ch <- prometheus.MustNewConstMetric(c.metrics.pressure, prometheus.GaugeValue, float64(pressure))
+	ch <- prometheus.MustNewConstMetric(c.metrics.humidity, prometheus.GaugeValue, float64(humidity))
+	ch <- prometheus.MustNewConstMetric(c.metrics.temperature, prometheus.GaugeValue, bmxData.Temperature.Celsius())
+	ch <- prometheus.MustNewConstMetric(c.metrics.pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
+}
+
+var (
+	listenAddress = flag.String("web.listen-address", ":7100", "Address to listen on for web interface.")
+	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
+)
+
+func main() {
+	flag.Parse()
+
 	ltr559Sensor, err := ltr559.New()
 	if err != nil {
 		panic(err)
@@ -78,98 +175,8 @@ func newEnvironmentMetricCollector() *environmentMetricCollector {
 		pms5003: pms5003Sensor,
 	}
 
-	return &environmentMetricCollector{
-		proximity: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "proximity"),
-			"proximity, with larger numbers being closer proximity and vice versa",
-			[]string{},
-			nil,
-		),
-		lux: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "lux"),
-			"current ambient light level (lux)",
-			[]string{}, // labels added here if needed
-			nil,
-		),
-		pressure: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "pressure"),
-			"pressure Pressure measured (hPa)",
-			[]string{}, // labels added here if needed
-			nil,
-		),
-		humidity: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "humidity"),
-			"humidity Relative humidity measured (%)",
-			[]string{}, // labels added here if needed
-			nil,
-		),
-		temperature: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "temperature"),
-			"temperature Temperature measured (*C)",
-			[]string{}, // labels added here if needed
-			nil,
-		),
-		pm1: prometheus.NewDesc(
-			prometheus.BuildFQName(namespace, "", "PM1"),
-			"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
-			[]string{}, // labels added here if needed
-			nil,
-		),
-		sensors: sensors,
-	}
-}
-
-func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- c.proximity
-	ch <- c.lux
-	ch <- c.pressure
-	ch <- c.humidity
-	ch <- c.temperature
-	ch <- c.pm1
-}
-
-func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
-	proximity, err := c.sensors.ltr559.Proximity()
-	if err != nil {
-		panic(err)
-	}
-
-	lux, err := c.sensors.ltr559.Lux()
-	if err != nil {
-		panic(err)
-	}
-
-	bmxData := physic.Env{}
-	if err := c.sensors.bmxx80.Sense(&bmxData); err != nil {
-		log.Fatal(err)
-	}
-
-	humidity := float64(bmxData.Humidity) / float64(physic.MilliRH)
-
-	// convert from nano pascal to hectopascal
-	pressure := float64(bmxData.Pressure) / float64(physic.KiloPascal / 100)
-
-	pm := c.sensors.pms5003.LastValue()
-
-	// labels added here if needed
-	ch <- prometheus.MustNewConstMetric(c.proximity, prometheus.GaugeValue, proximity)
-	ch <- prometheus.MustNewConstMetric(c.lux, prometheus.GaugeValue, lux)
-	ch <- prometheus.MustNewConstMetric(c.pressure, prometheus.GaugeValue, pressure)
-	ch <- prometheus.MustNewConstMetric(c.humidity, prometheus.GaugeValue, humidity)
-	ch <- prometheus.MustNewConstMetric(c.temperature, prometheus.GaugeValue, bmxData.Temperature.Celsius())
-	ch <- prometheus.MustNewConstMetric(c.pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
-}
-
-var (
-	listenAddress = flag.String("web.listen-address", ":7100", "Address to listen on for web interface.")
-	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
-)
-
-func main() {
-	flag.Parse()
-
-	collector := newEnvironmentMetricCollector()
-	defer collector.sensors.i2cBc.Close()
+	collector := newEnvironmentMetricCollector(sensors)
+	defer i2cBusCloser.Close()
 
 	prometheus.MustRegister(collector)
 
