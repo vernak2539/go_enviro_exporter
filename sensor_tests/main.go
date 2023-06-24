@@ -28,15 +28,24 @@ func main() {
 		log.Fatalf("failed to initialize bme280: %v", err)
 	}
 	e := physic.Env{}
-	if err := d.Sense(&e); err != nil {
-		log.Fatal(err)
-	}
 
 	for {
-		fmt.Printf("    temp: %8s\n", e.Temperature)
-		fmt.Printf("pressure: %10s\n", e.Pressure)
-		fmt.Printf("humidity: %9s\n", e.Humidity)
+		if err := d.Sense(&e); err != nil {
+			log.Fatal(err)
+		}
+
+		fmt.Print("    temp: ", int64(e.Temperature))
 		fmt.Println()
+
+		pressure := float64(e.Pressure) / float64(physic.KiloPascal/10)
+		fmt.Print("pressure: ", pressure)
+		fmt.Println()
+		fmt.Print("pressure: ", int64(e.Pressure))
+		fmt.Println()
+
+		fmt.Print("humidity: ", int32(e.Humidity))
+		fmt.Println()
+
 		time.Sleep(1 * time.Second)
 	}
 }
