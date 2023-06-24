@@ -43,7 +43,10 @@ func main() {
 		fmt.Print("pressure: ", int64(e.Pressure))
 		fmt.Println()
 
-		fmt.Print("humidity: ", int32(e.Humidity))
+		humidity := float64(e.Humidity) / float64(physic.PercentRH)
+		fmt.Print("humidity: ", humidity)
+		fmt.Println()
+		fmt.Print("humidity: ", int64(e.Humidity))
 		fmt.Println()
 
 		time.Sleep(1 * time.Second)

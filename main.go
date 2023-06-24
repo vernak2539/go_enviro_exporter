@@ -107,7 +107,7 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 		log.Fatal(err)
 	}
 
-	humidity := float64(bmxData.Humidity) / float64(physic.MilliRH)
+	humidity := float64(bmxData.Humidity) / float64(physic.PercentRH)
 
 	// convert from nano pascal to hectopascal
 	pressure := float64(bmxData.Pressure) / float64(physic.KiloPascal/10)
