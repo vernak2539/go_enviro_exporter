@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/rubiojr/go-enviroplus/pms5003"
 	"log"
 	"periph.io/x/periph/conn/i2c/i2creg"
 	"periph.io/x/periph/conn/physic"
@@ -29,7 +30,16 @@ func main() {
 	}
 	e := physic.Env{}
 
+	particulateMatterSensor, err := pms5003.New()
+	if err != nil {
+		panic(err)
+	}
+	go func() {
+		particulateMatterSensor.StartReading()
+	}()
+
 	for {
+		pm := particulateMatterSensor.LastValue()
 		if err := d.Sense(&e); err != nil {
 			log.Fatal(err)
 		}
@@ -48,6 +58,20 @@ func main() {
 		fmt.Println()
 		fmt.Print("humidity: ", int64(e.Humidity))
 		fmt.Println()
+
+		fmt.Println("-------")
+		fmt.Println("PM1.0 ug/m3 (ultrafine):                        ", pm.Pm10Std)
+		fmt.Println("PM2.5 ug/m3 (combustion, organic comp, metals): ", pm.Pm25Std)
+		fmt.Println("PM10 ug/m3 (dust, pollen, mould spores):        ", pm.Pm100Std)
+		fmt.Println("PM1.0 ug/m3 (atmos env):                        ", pm.Pm10Env)
+		fmt.Println("PM2.5 ug/m3 (atmos env):                        ", pm.Pm25Env)
+		fmt.Println("PM10 ug/m3 (atmos env):                         ", pm.Pm100Env)
+		fmt.Println("0.3um 1 0.1L air:                               ", pm.Particles3um)
+		fmt.Println("0.5um 1 0.1L air:                               ", pm.Particles5um)
+		fmt.Println("1.0um 1 0.1L air:                               ", pm.Particles10um)
+		fmt.Println("2.5um 1 0.1L air:                               ", pm.Particles25um)
+		fmt.Println("5um 1 0.1L air:                                 ", pm.Particles50um)
+		fmt.Println("10um 1 0.1L air:                                ", pm.Particles100um)
 
 		time.Sleep(1 * time.Second)
 	}
