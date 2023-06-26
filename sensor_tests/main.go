@@ -62,7 +62,6 @@ func main() {
 		fmt.Print("humidity: ", int64(e.Humidity))
 		fmt.Println()
 
-		fmt.Println("-------")
 		fmt.Println("PM1.0 ug/m3 (ultrafine):                        ", pm.Pm10Std)
 		fmt.Println("PM2.5 ug/m3 (combustion, organic comp, metals): ", pm.Pm25Std)
 		fmt.Println("PM10 ug/m3 (dust, pollen, mould spores):        ", pm.Pm100Std)
@@ -75,6 +74,8 @@ func main() {
 		fmt.Println("2.5um 1 0.1L air:                               ", pm.Particles25um)
 		fmt.Println("5um 1 0.1L air:                                 ", pm.Particles50um)
 		fmt.Println("10um 1 0.1L air:                                ", pm.Particles100um)
+		fmt.Println()
+		fmt.Println()
 
 		time.Sleep(1 * time.Second)
 	}
