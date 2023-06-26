@@ -3,17 +3,18 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"net/http"
+	"reflect"
+
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/rubiojr/go-enviroplus/ltr559"
 	"github.com/rubiojr/go-enviroplus/pms5003"
-	"log"
-	"net/http"
-	"periph.io/x/periph/conn/i2c/i2creg"
-	"periph.io/x/periph/conn/physic"
-	"periph.io/x/periph/devices/bmxx80"
-	"periph.io/x/periph/host"
-	"reflect"
+	"periph.io/x/conn/v3/i2c/i2creg"
+	"periph.io/x/conn/v3/physic"
+	"periph.io/x/devices/v3/bmxx80"
+	"periph.io/x/host/v3"
 )
 
 type sensors struct {
@@ -134,23 +135,23 @@ func initLightProximitySensor() *ltr559.LTR559 {
 	return sensor
 }
 
-func initBmeSensor() (*bmxx80.Dev, func() error) {
+func initBmeSensor() (*bmxx80.Dev, func() error, func() error) {
 	if _, err := host.Init(); err != nil {
 		log.Fatal(err)
 	}
 
-	// Use i2creg I²C bus registry to find the first available I²C bus.
-	b, err := i2creg.Open("")
+	// Open a handle to the first available I²C bus:
+	bus, err := i2creg.Open("")
 	if err != nil {
-		log.Fatalf("failed to open I²C: %v", err)
+		log.Fatal(err)
 	}
 
-	sensor, err := bmxx80.NewI2C(b, 0x76, &bmxx80.DefaultOpts)
+	sensor, err := bmxx80.NewI2C(bus, 0x76, &bmxx80.DefaultOpts)
 	if err != nil {
 		log.Fatalf("failed to initialize bme280: %v", err)
 	}
 
-	return sensor, b.Close
+	return sensor, bus.Close, sensor.Halt
 }
 
 func initPmsSensor() *pms5003.Device {
@@ -171,8 +172,9 @@ func main() {
 
 	ltrSensor := initLightProximitySensor()
 	pmsSensor := initPmsSensor()
-	bmeSensor, bmxCleanUp := initBmeSensor()
-	defer bmxCleanUp()
+	bmeSensor, bmxBusCleanUp, bmxSensorCleanUp := initBmeSensor()
+	defer bmxBusCleanUp()
+	defer bmxSensorCleanUp()
 
 	sensors := sensors{
 		ltr559:  ltrSensor,
