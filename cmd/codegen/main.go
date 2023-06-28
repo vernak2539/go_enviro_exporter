@@ -4,12 +4,13 @@ import (
 	"bytes"
 	_ "embed"
 	"flag"
-	"fmt"
 	"go/format"
 	"log"
 	"os"
 	"path/filepath"
 	"reflect"
+	"sort"
+	"strings"
 	"text/template"
 
 	"gopkg.in/yaml.v2"
@@ -56,7 +57,7 @@ func main() {
 	metrics := make([]metricData, 0, len(rawMetrics))
 	for name, m := range rawMetrics {
 		metrics = append(metrics, metricData{
-			Name:           name,
+			Name:           strings.Title(name),
 			Namespace:      m.Namespace,
 			Help:           m.Help,
 			ConstLabels:    m.ConstLabels,
@@ -64,9 +65,9 @@ func main() {
 		})
 	}
 
-	fmt.Printf("%+v\n", metrics)
-
-	fmt.Println(metrics)
+	sort.Slice(metrics, func(i, j int) bool {
+		return strings.ToLower(metrics[i].Name) < strings.ToLower(metrics[j].Name)
+	})
 
 	tm := template.Must(template.New("metrics.go").Parse(metricsTemplate))
 	vars := struct {
@@ -84,7 +85,7 @@ func main() {
 	err = os.MkdirAll(args.dest, os.ModePerm)
 	must(err)
 
-	destpath := filepath.Join(args.dest, "flags.go")
+	destpath := filepath.Join(args.dest, "metrics.go")
 	writeGoFile(destpath, &b, false)
 }
 

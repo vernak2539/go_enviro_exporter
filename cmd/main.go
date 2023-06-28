@@ -9,6 +9,7 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"github.com/vernak2539/go_enviro_exporter/internal/metrics"
 	"github.com/vernak2539/go_enviro_exporter/internal/sensors"
 )
 
@@ -18,17 +19,8 @@ type allSensors struct {
 	bmxx80  *sensors.BmeSensor
 }
 
-type metrics struct {
-	proximity   *prometheus.Desc
-	lux         *prometheus.Desc
-	pressure    *prometheus.Desc
-	humidity    *prometheus.Desc
-	temperature *prometheus.Desc
-	pm1         *prometheus.Desc
-}
-
 type environmentMetricCollector struct {
-	metrics metrics
+	metrics *metrics.ExporterMetrics
 	sensors allSensors
 }
 
@@ -37,44 +29,7 @@ func newEnvironmentMetricCollector(sensors allSensors) *environmentMetricCollect
 
 	return &environmentMetricCollector{
 		sensors: sensors,
-		metrics: metrics{
-			proximity: prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, "", "proximity"),
-				"proximity, with larger numbers being closer proximity and vice versa",
-				[]string{},
-				nil,
-			),
-			lux: prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, "", "lux"),
-				"current ambient light level (lux)",
-				[]string{}, // labels added here if needed
-				nil,
-			),
-			pressure: prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, "", "pressure"),
-				"pressure Pressure measured (hPa)",
-				[]string{}, // labels added here if needed
-				nil,
-			),
-			humidity: prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, "", "humidity"),
-				"humidity Relative humidity measured (%)",
-				[]string{}, // labels added here if needed
-				nil,
-			),
-			temperature: prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, "", "temperature"),
-				"temperature Temperature measured (*C)",
-				[]string{}, // labels added here if needed
-				nil,
-			),
-			pm1: prometheus.NewDesc(
-				prometheus.BuildFQName(namespace, "", "PM1"),
-				"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
-				[]string{}, // labels added here if needed
-				nil,
-			),
-		},
+		metrics: metrics.CreateExporterMetricPromDescriptors(),
 	}
 }
 
@@ -96,12 +51,12 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	temp := c.sensors.bmxx80.GetTemperature()
 
 	// labels added here if needed
-	ch <- prometheus.MustNewConstMetric(c.metrics.proximity, prometheus.GaugeValue, proximity)
-	ch <- prometheus.MustNewConstMetric(c.metrics.lux, prometheus.GaugeValue, lux)
-	ch <- prometheus.MustNewConstMetric(c.metrics.pressure, prometheus.GaugeValue, pressure)
-	ch <- prometheus.MustNewConstMetric(c.metrics.humidity, prometheus.GaugeValue, humidity)
-	ch <- prometheus.MustNewConstMetric(c.metrics.temperature, prometheus.GaugeValue, temp)
-	ch <- prometheus.MustNewConstMetric(c.metrics.pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
+	ch <- prometheus.MustNewConstMetric(c.metrics.Proximity, prometheus.GaugeValue, proximity)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Lux, prometheus.GaugeValue, lux)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pressure, prometheus.GaugeValue, pressure)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Humidity, prometheus.GaugeValue, humidity)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Temperature, prometheus.GaugeValue, temp)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
 }
 
 var (
