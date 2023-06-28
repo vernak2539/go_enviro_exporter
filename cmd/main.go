@@ -9,7 +9,6 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rubiojr/go-enviroplus/pms5003"
 	"github.com/vernak2539/go_enviro_exporter/internal/sensors"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/conn/v3/physic"
@@ -19,8 +18,8 @@ import (
 
 type allSensors struct {
 	ltr559  *sensors.LtrSensor
+	pms5003 *sensors.PmsSensor
 	bmxx80  *bmxx80.Dev
-	pms5003 *pms5003.Device
 }
 
 type metrics struct {
@@ -95,6 +94,7 @@ func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	proximity := c.sensors.ltr559.GetProximity()
 	lux := c.sensors.ltr559.GetLux()
+	pm := c.sensors.pms5003.GetPmMeasurement()
 
 	bmxData := physic.Env{}
 	if err := c.sensors.bmxx80.Sense(&bmxData); err != nil {
@@ -103,7 +103,6 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 
 	humidity := float64(bmxData.Humidity) / float64(physic.PercentRH)
 	pressure := float64(bmxData.Pressure) / float64(physic.KiloPascal/10) // convert from nano pascal to hectopascal
-	pm := c.sensors.pms5003.LastValue()
 
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.metrics.proximity, prometheus.GaugeValue, proximity)
@@ -138,35 +137,22 @@ func initBmeSensor() (*bmxx80.Dev, func() error, func() error) {
 	return sensor, bus.Close, sensor.Halt
 }
 
-func initPmsSensor() *pms5003.Device {
-	sensor, err := pms5003.New()
-	if err != nil {
-		panic(err)
-	}
-
-	go func() {
-		sensor.StartReading()
-	}()
-
-	return sensor
-}
-
 func main() {
 	flag.Parse()
 
 	ltrSensor := sensors.NewLtrSensor()
-	pmsSensor := initPmsSensor()
+	pmsSensor := sensors.NewPmsSensor()
 	bmeSensor, bmxBusCleanUp, bmxSensorCleanUp := initBmeSensor()
 	defer bmxBusCleanUp()
 	defer bmxSensorCleanUp()
 
-	sensors := allSensors{
+	s := allSensors{
 		ltr559:  ltrSensor,
 		bmxx80:  bmeSensor,
 		pms5003: pmsSensor,
 	}
 
-	collector := newEnvironmentMetricCollector(sensors)
+	collector := newEnvironmentMetricCollector(s)
 
 	prometheus.MustRegister(collector)
 	http.Handle(*metricsPath, promhttp.Handler())
