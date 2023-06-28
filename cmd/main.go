@@ -10,16 +10,12 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/vernak2539/go_enviro_exporter/internal/sensors"
-	"periph.io/x/conn/v3/i2c/i2creg"
-	"periph.io/x/conn/v3/physic"
-	"periph.io/x/devices/v3/bmxx80"
-	"periph.io/x/host/v3"
 )
 
 type allSensors struct {
 	ltr559  *sensors.LtrSensor
 	pms5003 *sensors.PmsSensor
-	bmxx80  *bmxx80.Dev
+	bmxx80  *sensors.BmeSensor
 }
 
 type metrics struct {
@@ -95,21 +91,16 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	proximity := c.sensors.ltr559.GetProximity()
 	lux := c.sensors.ltr559.GetLux()
 	pm := c.sensors.pms5003.GetPmMeasurement()
-
-	bmxData := physic.Env{}
-	if err := c.sensors.bmxx80.Sense(&bmxData); err != nil {
-		log.Fatal(err)
-	}
-
-	humidity := float64(bmxData.Humidity) / float64(physic.PercentRH)
-	pressure := float64(bmxData.Pressure) / float64(physic.KiloPascal/10) // convert from nano pascal to hectopascal
+	humidity := c.sensors.bmxx80.GetHumidity()
+	pressure := c.sensors.bmxx80.GetPressure()
+	temp := c.sensors.bmxx80.GetTemperature()
 
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.metrics.proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.metrics.lux, prometheus.GaugeValue, lux)
 	ch <- prometheus.MustNewConstMetric(c.metrics.pressure, prometheus.GaugeValue, pressure)
 	ch <- prometheus.MustNewConstMetric(c.metrics.humidity, prometheus.GaugeValue, humidity)
-	ch <- prometheus.MustNewConstMetric(c.metrics.temperature, prometheus.GaugeValue, bmxData.Temperature.Celsius())
+	ch <- prometheus.MustNewConstMetric(c.metrics.temperature, prometheus.GaugeValue, temp)
 	ch <- prometheus.MustNewConstMetric(c.metrics.pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
 }
 
@@ -118,33 +109,13 @@ var (
 	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
 )
 
-func initBmeSensor() (*bmxx80.Dev, func() error, func() error) {
-	if _, err := host.Init(); err != nil {
-		log.Fatal(err)
-	}
-
-	// Open a handle to the first available I²C bus:
-	bus, err := i2creg.Open("")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sensor, err := bmxx80.NewI2C(bus, 0x76, &bmxx80.DefaultOpts)
-	if err != nil {
-		log.Fatalf("failed to initialize bme280: %v", err)
-	}
-
-	return sensor, bus.Close, sensor.Halt
-}
-
 func main() {
 	flag.Parse()
 
 	ltrSensor := sensors.NewLtrSensor()
 	pmsSensor := sensors.NewPmsSensor()
-	bmeSensor, bmxBusCleanUp, bmxSensorCleanUp := initBmeSensor()
-	defer bmxBusCleanUp()
-	defer bmxSensorCleanUp()
+	bmeSensor := sensors.NewBmeSensor()
+	defer bmeSensor.Close()
 
 	s := allSensors{
 		ltr559:  ltrSensor,
