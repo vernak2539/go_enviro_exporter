@@ -5,8 +5,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 )
 
-type ExporterMetrics {
+type ExporterMetrics struct {
 {{ range .Metrics }}
-  {{.Name}} = *prometheus.Desc
+  {{.Name}} *prometheus.Desc
 {{ end }}
 }

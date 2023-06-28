@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"flag"
+	"fmt"
 	"go/format"
 	"log"
 	"os"
@@ -62,6 +63,10 @@ func main() {
 			VariableLabels: m.VariableLabels,
 		})
 	}
+
+	fmt.Printf("%+v\n", metrics)
+
+	fmt.Println(metrics)
 
 	tm := template.Must(template.New("metrics.go").Parse(metricsTemplate))
 	vars := struct {
