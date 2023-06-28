@@ -7,5 +7,5 @@
 package tools
 
 import (
-	_ "github.com/vernak2539/go_enviro_exporter/cmd/feature-codegen"
+	_ "github.com/vernak2539/go_enviro_exporter/cmd/codegen"
 )
