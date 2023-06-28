@@ -9,16 +9,16 @@ import (
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/rubiojr/go-enviroplus/ltr559"
 	"github.com/rubiojr/go-enviroplus/pms5003"
+	"github.com/vernak2539/go_enviro_exporter/internal/sensors"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/conn/v3/physic"
 	"periph.io/x/devices/v3/bmxx80"
 	"periph.io/x/host/v3"
 )
 
-type sensors struct {
-	ltr559  *ltr559.LTR559
+type allSensors struct {
+	ltr559  *sensors.LtrSensor
 	bmxx80  *bmxx80.Dev
 	pms5003 *pms5003.Device
 }
@@ -34,10 +34,10 @@ type metrics struct {
 
 type environmentMetricCollector struct {
 	metrics metrics
-	sensors sensors
+	sensors allSensors
 }
 
-func newEnvironmentMetricCollector(sensors sensors) *environmentMetricCollector {
+func newEnvironmentMetricCollector(sensors allSensors) *environmentMetricCollector {
 	const namespace = ""
 
 	return &environmentMetricCollector{
@@ -93,15 +93,8 @@ func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
 }
 
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
-	proximity, err := c.sensors.ltr559.Proximity()
-	if err != nil {
-		panic(err)
-	}
-
-	lux, err := c.sensors.ltr559.Lux()
-	if err != nil {
-		panic(err)
-	}
+	proximity := c.sensors.ltr559.GetProximity()
+	lux := c.sensors.ltr559.GetLux()
 
 	bmxData := physic.Env{}
 	if err := c.sensors.bmxx80.Sense(&bmxData); err != nil {
@@ -125,15 +118,6 @@ var (
 	listenAddress = flag.String("web.listen-address", ":7100", "Address to listen on for web interface.")
 	metricsPath   = flag.String("web.metrics-path", "/metrics", "Path under which to expose metrics.")
 )
-
-func initLightProximitySensor() *ltr559.LTR559 {
-	sensor, err := ltr559.New()
-	if err != nil {
-		panic(err)
-	}
-
-	return sensor
-}
 
 func initBmeSensor() (*bmxx80.Dev, func() error, func() error) {
 	if _, err := host.Init(); err != nil {
@@ -170,13 +154,13 @@ func initPmsSensor() *pms5003.Device {
 func main() {
 	flag.Parse()
 
-	ltrSensor := initLightProximitySensor()
+	ltrSensor := sensors.NewLtrSensor()
 	pmsSensor := initPmsSensor()
 	bmeSensor, bmxBusCleanUp, bmxSensorCleanUp := initBmeSensor()
 	defer bmxBusCleanUp()
 	defer bmxSensorCleanUp()
 
-	sensors := sensors{
+	sensors := allSensors{
 		ltr559:  ltrSensor,
 		bmxx80:  bmeSensor,
 		pms5003: pmsSensor,
