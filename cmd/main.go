@@ -13,9 +13,10 @@ import (
 )
 
 type allSensors struct {
-	ltr559  *sensors.LtrSensor
-	pms5003 *sensors.PmsSensor
-	bmxx80  *sensors.BmeSensor
+	ltr559   *sensors.LtrSensor
+	pms5003  *sensors.PmsSensor
+	bmxx80   *sensors.BmeSensor
+	mics6814 *sensors.MicsSensor
 }
 
 type environmentMetricCollector struct {
@@ -82,9 +83,10 @@ func main() {
 	defer bmeSensor.Close()
 
 	s := allSensors{
-		ltr559:  ltrSensor,
-		bmxx80:  bmeSensor,
-		pms5003: pmsSensor,
+		ltr559:   ltrSensor,
+		bmxx80:   bmeSensor,
+		pms5003:  pmsSensor,
+		mics6814: micsSensor,
 	}
 
 	collector := newEnvironmentMetricCollector(s)
