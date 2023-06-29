@@ -29,7 +29,7 @@ temperature:
   variable_labels: []
   const_labels: []
 
-pm1:
+PM1:
   help: "Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)"
   namespace: ""
   variable_labels: []

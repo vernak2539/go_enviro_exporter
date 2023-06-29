@@ -40,7 +40,7 @@ func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
 	ch <- c.metrics.Pressure
 	ch <- c.metrics.Humidity
 	ch <- c.metrics.Temperature
-	ch <- c.metrics.Pm1
+	ch <- c.metrics.PM1
 }
 
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
@@ -57,7 +57,7 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(c.metrics.Pressure, prometheus.GaugeValue, pressure)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Humidity, prometheus.GaugeValue, humidity)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Temperature, prometheus.GaugeValue, temp)
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
+	ch <- prometheus.MustNewConstMetric(c.metrics.PM1, prometheus.GaugeValue, float64(pm.Pm10Std))
 }
 
 var (

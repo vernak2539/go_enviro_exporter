@@ -10,7 +10,7 @@ type ExporterMetrics struct {
 
 	Lux *prometheus.Desc
 
-	Pm1 *prometheus.Desc
+	PM1 *prometheus.Desc
 
 	Pressure *prometheus.Desc
 
@@ -35,8 +35,8 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 			nil,
 		),
 
-		Pm1: prometheus.NewDesc(
-			prometheus.BuildFQName("", "", "Pm1"),
+		PM1: prometheus.NewDesc(
+			prometheus.BuildFQName("", "", "PM1"),
 			"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
 			[]string{},
 			nil,

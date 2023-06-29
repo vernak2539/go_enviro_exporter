@@ -1,3 +1,6 @@
+generate:
+	go generate ./...
+
 build: build_arm6 build_arm7 build_amd64 build_arm64
 
 build_arm6:
