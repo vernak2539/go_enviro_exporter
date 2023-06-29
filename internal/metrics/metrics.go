@@ -6,102 +6,102 @@ import (
 )
 
 type ExporterMetrics struct {
-	humidity *prometheus.Desc
+	Humidity *prometheus.Desc
 
-	lux *prometheus.Desc
+	Lux *prometheus.Desc
 
-	nh3 *prometheus.Desc
+	Nh3 *prometheus.Desc
 
-	oxidising *prometheus.Desc
+	Oxidising *prometheus.Desc
 
-	pm1 *prometheus.Desc
+	Pm1 *prometheus.Desc
 
-	pm10 *prometheus.Desc
+	Pm10 *prometheus.Desc
 
-	pm25 *prometheus.Desc
+	Pm25 *prometheus.Desc
 
-	pressure *prometheus.Desc
+	Pressure *prometheus.Desc
 
-	proximity *prometheus.Desc
+	Proximity *prometheus.Desc
 
-	reducing *prometheus.Desc
+	Reducing *prometheus.Desc
 
-	temperature *prometheus.Desc
+	Temperature *prometheus.Desc
 }
 
 func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 	return &ExporterMetrics{
-		humidity: prometheus.NewDesc(
+		Humidity: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "humidity"),
 			"humidity Relative humidity measured (%)",
 			[]string{},
 			nil,
 		),
 
-		lux: prometheus.NewDesc(
+		Lux: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "lux"),
 			"current ambient light level (lux)",
 			[]string{},
 			nil,
 		),
 
-		nh3: prometheus.NewDesc(
+		Nh3: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "NH3"),
 			"mostly Ammonia but could also include Hydrogen, Ethanol, Propane, Iso-butane (Ohms)",
 			[]string{},
 			nil,
 		),
 
-		oxidising: prometheus.NewDesc(
+		Oxidising: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "oxidising"),
 			"Mostly nitrogen dioxide but could include NO and Hydrogen (Ohms)",
 			[]string{},
 			nil,
 		),
 
-		pm1: prometheus.NewDesc(
+		Pm1: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "PM1"),
 			"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
 			[]string{},
 			nil,
 		),
 
-		pm10: prometheus.NewDesc(
+		Pm10: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "PM10"),
 			"Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)",
 			[]string{},
 			nil,
 		),
 
-		pm25: prometheus.NewDesc(
+		Pm25: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "PM25"),
 			"Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)",
 			[]string{},
 			nil,
 		),
 
-		pressure: prometheus.NewDesc(
+		Pressure: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "pressure"),
 			"pressure Pressure measured (hPa)",
 			[]string{},
 			nil,
 		),
 
-		proximity: prometheus.NewDesc(
+		Proximity: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "proximity"),
 			"proximity, with larger numbers being closer proximity and vice versa",
 			[]string{},
 			nil,
 		),
 
-		reducing: prometheus.NewDesc(
+		Reducing: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "reducing"),
 			"Mostly carbon monoxide but could include H2S, Ammonia, Ethanol, Hydrogen, Methane, Propane, Iso-butane (Ohms)",
 			[]string{},
 			nil,
 		),
 
-		temperature: prometheus.NewDesc(
+		Temperature: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "temperature"),
 			"temperature Temperature measured (*C)",
 			[]string{},

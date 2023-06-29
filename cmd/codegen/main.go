@@ -60,7 +60,7 @@ func main() {
 	metrics := make([]metricData, 0, len(rawMetrics))
 	for entry, m := range rawMetrics {
 		metrics = append(metrics, metricData{
-			Name:           entry,
+			Name:           strings.Title(entry),
 			Metric:         m.Metric,
 			Namespace:      m.Namespace,
 			Help:           m.Help,
