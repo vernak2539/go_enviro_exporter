@@ -74,6 +74,10 @@ func main() {
 
 	ltrSensor := sensors.NewLtrSensor()
 	pmsSensor := sensors.NewPmsSensor()
+
+	micsSensor := sensors.NewMicsSensor()
+	defer micsSensor.Close()
+
 	bmeSensor := sensors.NewBmeSensor()
 	defer bmeSensor.Close()
 
