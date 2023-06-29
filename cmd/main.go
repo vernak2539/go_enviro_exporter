@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"reflect"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -34,12 +33,14 @@ func newEnvironmentMetricCollector(sensors allSensors) *environmentMetricCollect
 }
 
 func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
-	v := reflect.ValueOf(c.metrics)
-	values := make([]*prometheus.Desc, v.NumField())
-
-	for _, metric := range values {
-		ch <- metric
-	}
+	// wish this could be dynamic, but reflecting and iterating a struct with pointers if a non-trivial problem. Haven't
+	// found the answer yet
+	ch <- c.metrics.Proximity
+	ch <- c.metrics.Lux
+	ch <- c.metrics.Pressure
+	ch <- c.metrics.Humidity
+	ch <- c.metrics.Temperature
+	ch <- c.metrics.Pm1
 }
 
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
