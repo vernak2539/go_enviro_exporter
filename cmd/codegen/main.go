@@ -16,7 +16,8 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type metric struct {
+type rawMetric struct {
+	Metric         string   `json:"metric"`
 	Help           string   `json:"help"`
 	Namespace      string   `json:"namespace"`
 	ConstLabels    []string `json:"const_labels"`
@@ -25,6 +26,7 @@ type metric struct {
 
 type metricData struct {
 	Name           string
+	Metric         string
 	Namespace      string
 	Help           string
 	ConstLabels    []string
@@ -49,15 +51,17 @@ func main() {
 	if err != nil {
 		log.Fatalln("unable to open file:", err)
 	}
-	var rawMetrics map[string]metric
+
+	var rawMetrics map[string]rawMetric
 	if err := yaml.Unmarshal(data, &rawMetrics); err != nil {
 		log.Fatalln("unable to unmarshal yml:", err)
 	}
 
 	metrics := make([]metricData, 0, len(rawMetrics))
-	for name, m := range rawMetrics {
+	for entry, m := range rawMetrics {
 		metrics = append(metrics, metricData{
-			Name:           strings.Title(name),
+			Name:           entry,
+			Metric:         m.Metric,
 			Namespace:      m.Namespace,
 			Help:           m.Help,
 			ConstLabels:    m.ConstLabels,
@@ -103,7 +107,7 @@ func writeGoFile(path string, b *bytes.Buffer, verify bool) {
 		must(err)
 		if !reflect.DeepEqual(formatted, destdata) {
 			log.Fatalf("metrics.go is a generated file by this script.\n")
-			log.Fatalf("To add a metric, add it to .metrics.yml and re-run this script.\n")
+			log.Fatalf("To add a rawMetric, add it to .metrics.yml and re-run this script.\n")
 			log.Fatalf("%s is out of sync.\n", path)
 			os.Exit(1)
 		}

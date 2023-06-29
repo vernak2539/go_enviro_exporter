@@ -15,7 +15,7 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
   return &ExporterMetrics{
 {{- range .Metrics }}
     {{.Name}}: prometheus.NewDesc(
-        prometheus.BuildFQName("{{.Namespace}}", "", "{{.Name}}"),
+        prometheus.BuildFQName("{{.Namespace}}", "", "{{.Metric}}"),
         "{{.Help}}",
         []string{},
         nil,
