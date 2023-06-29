@@ -1,48 +1,77 @@
 ---
 proximity:
+  metric_name: "proximity"
   help: "proximity, with larger numbers being closer proximity and vice versa"
   namespace: ""
   variable_labels: []
   const_labels: []
 
 lux:
+  metric_name: "lux"
   help: "current ambient light level (lux)"
   namespace: ""
   variable_labels: []
   const_labels: []
 
 pressure:
+  metric_name: "pressure"
   help: "pressure Pressure measured (hPa)"
   namespace: ""
   variable_labels: []
   const_labels: []
 
 humidity:
+  metric_name: "humidity"
   help: "humidity Relative humidity measured (%)"
   namespace: ""
   variable_labels: []
   const_labels: []
 
 temperature:
+  metric_name: "temperature"
   help: "temperature Temperature measured (*C)"
   namespace: ""
   variable_labels: []
   const_labels: []
 
-PM1:
+pm1:
+  metric_name: "PM1"
   help: "Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)"
   namespace: ""
   variable_labels: []
   const_labels: []
 
-PM25:
+pm25:
+  metric_name: "PM25"
   help: "Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)"
   namespace: ""
   variable_labels: []
   const_labels: []
 
-PM10:
+pm10:
+  metric_name: "PM10"
   help: "Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
+nh3:
+  metric_name: "NH3"
+  help: "mostly Ammonia but could also include Hydrogen, Ethanol, Propane, Iso-butane (Ohms)"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
+reducing:
+  metric_name: "reducing"
+  help: "Mostly carbon monoxide but could include H2S, Ammonia, Ethanol, Hydrogen, Methane, Propane, Iso-butane (Ohms)"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
+oxidising:
+  metric_name: "oxidising"
+  help: "Mostly nitrogen dioxide but could include NO and Hydrogen (Ohms)"
   namespace: ""
   variable_labels: []
   const_labels: []
