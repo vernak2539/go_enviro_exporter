@@ -34,3 +34,15 @@ PM1:
   namespace: ""
   variable_labels: []
   const_labels: []
+
+PM25:
+  help: "Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
+PM10:
+  help: "Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)"
+  namespace: ""
+  variable_labels: []
+  const_labels: []

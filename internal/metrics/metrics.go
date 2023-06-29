@@ -12,6 +12,10 @@ type ExporterMetrics struct {
 
 	PM1 *prometheus.Desc
 
+	PM10 *prometheus.Desc
+
+	PM25 *prometheus.Desc
+
 	Pressure *prometheus.Desc
 
 	Proximity *prometheus.Desc
@@ -38,6 +42,20 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 		PM1: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "PM1"),
 			"Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)",
+			[]string{},
+			nil,
+		),
+
+		PM10: prometheus.NewDesc(
+			prometheus.BuildFQName("", "", "PM10"),
+			"Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)",
+			[]string{},
+			nil,
+		),
+
+		PM25: prometheus.NewDesc(
+			prometheus.BuildFQName("", "", "PM25"),
+			"Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)",
 			[]string{},
 			nil,
 		),
