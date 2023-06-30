@@ -109,3 +109,28 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 		),
 	}
 }
+
+func (m *ExporterMetrics) Describe(ch chan<- *prometheus.Desc) {
+	ch <- m.Humidity
+
+	ch <- m.Lux
+
+	ch <- m.Nh3
+
+	ch <- m.Oxidising
+
+	ch <- m.Pm1
+
+	ch <- m.Pm10
+
+	ch <- m.Pm25
+
+	ch <- m.Pressure
+
+	ch <- m.Proximity
+
+	ch <- m.Reducing
+
+	ch <- m.Temperature
+
+}

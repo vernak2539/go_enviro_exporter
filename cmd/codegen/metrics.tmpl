@@ -23,3 +23,9 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 {{ end }}
   }
 }
+
+func (m *ExporterMetrics) Describe(ch chan<- *prometheus.Desc) {
+{{- range .Metrics }}
+  ch <- m.{{.Name}}
+{{ end }}
+}
