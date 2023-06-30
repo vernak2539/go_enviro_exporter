@@ -34,16 +34,7 @@ func newEnvironmentMetricCollector(sensors allSensors) *environmentMetricCollect
 }
 
 func (c *environmentMetricCollector) Describe(ch chan<- *prometheus.Desc) {
-	// wish this could be dynamic, but reflecting and iterating a struct with pointers if a non-trivial problem. Haven't
-	// found the answer yet
-	ch <- c.metrics.Proximity
-	ch <- c.metrics.Lux
-	ch <- c.metrics.Pressure
-	ch <- c.metrics.Humidity
-	ch <- c.metrics.Temperature
-	ch <- c.metrics.Pm1
-	ch <- c.metrics.Pm25
-	ch <- c.metrics.Pm10
+	c.metrics.Describe(ch)
 }
 
 func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
