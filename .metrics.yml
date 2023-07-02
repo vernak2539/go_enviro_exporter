@@ -41,6 +41,13 @@ pm1:
   variable_labels: []
   const_labels: []
 
+pm1_hist:
+  help: "Histogram of Particulate Matter of diameter less than 1 micron measurements"
+  metric: "pm1_measurements"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
 pm25:
   help: "Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)"
   metric: "PM25"
@@ -48,9 +55,23 @@ pm25:
   variable_labels: []
   const_labels: []
 
+pm25_hist:
+  help: "Histogram of Particulate Matter of diameter less than 2.5 microns measurements"
+  metric: "pm25_measurements"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
 pm10:
   help: "Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)"
   metric: "PM10"
+  namespace: ""
+  variable_labels: []
+  const_labels: []
+
+pm10_hist:
+  help: "Histogram of Particulate Matter of diameter less than 10 microns measurements"
+  metric: "pm10_measurements"
   namespace: ""
   variable_labels: []
   const_labels: []
