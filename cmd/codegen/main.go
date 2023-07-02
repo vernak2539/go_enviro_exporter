@@ -4,6 +4,7 @@ import (
 	"bytes"
 	_ "embed"
 	"flag"
+	"fmt"
 	"go/format"
 	"log"
 	"os"
@@ -19,6 +20,7 @@ import (
 type rawMetric struct {
 	Metric         string   `json:"metric"`
 	Help           string   `json:"help"`
+	MetricType     string   `json:"metric_type"`
 	Namespace      string   `json:"namespace"`
 	ConstLabels    []string `json:"const_labels"`
 	VariableLabels []string `json:"variable_labels"`
@@ -56,6 +58,8 @@ func main() {
 	if err := yaml.Unmarshal(data, &rawMetrics); err != nil {
 		log.Fatalln("unable to unmarshal yml:", err)
 	}
+
+	fmt.Println("%v", rawMetrics)
 
 	metrics := make([]metricData, 0, len(rawMetrics))
 	for entry, m := range rawMetrics {

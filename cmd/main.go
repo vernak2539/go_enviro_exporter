@@ -46,8 +46,6 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	temp := c.sensors.bmxx80.GetTemperature()
 	gas := c.sensors.mics6814.GetGasMeasurements()
 
-	pmHistBuckets := map[float64]uint64{0: 0, 5: 5, 10: 10, 15: 15, 20: 20, 25: 25, 30: 30, 35: 35, 40: 40, 45: 45, 50: 50, 55: 55, 60: 60, 65: 65, 70: 70, 75: 75, 80: 80, 85: 85, 90: 90, 95: 95, 100: 100}
-
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.metrics.Proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Lux, prometheus.GaugeValue, lux)
@@ -60,9 +58,6 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(c.metrics.Oxidising, prometheus.GaugeValue, gas.Oxidising)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Reducing, prometheus.GaugeValue, gas.Reducing)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Nh3, prometheus.GaugeValue, gas.NH3)
-	ch <- prometheus.MustNewConstHistogram(c.metrics.Pm1_hist, uint64(pm.Pm10Std), float64(pm.Pm10Std), pmHistBuckets)
-	ch <- prometheus.MustNewConstHistogram(c.metrics.Pm25_hist, uint64(pm.Pm25Std), float64(pm.Pm25Std) - float64(pm.Pm10Std), pmHistBuckets)
-	ch <- prometheus.MustNewConstHistogram(c.metrics.Pm10_hist, uint64(pm.Pm100Std), float64(pm.Pm100Std) - float64(pm.Pm25Std), pmHistBuckets)
 }
 
 var (

@@ -2,6 +2,7 @@
 proximity:
   help: "proximity, with larger numbers being closer proximity and vice versa"
   metric: "proximity"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -9,6 +10,7 @@ proximity:
 lux:
   help: "current ambient light level (lux)"
   metric: "lux"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -16,6 +18,7 @@ lux:
 pressure:
   help: "pressure Pressure measured (hPa)"
   metric: "pressure"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -23,6 +26,7 @@ pressure:
 humidity:
   help: "humidity Relative humidity measured (%)"
   metric: "humidity"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -30,6 +34,7 @@ humidity:
 temperature:
   help: "temperature Temperature measured (*C)"
   metric: "temperature"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -37,6 +42,7 @@ temperature:
 pm1:
   help: "Particulate Matter of diameter less than 1 micron. Measured in micrograms per cubic metre (ug/m3)"
   metric: "PM1"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -44,6 +50,7 @@ pm1:
 pm1_hist:
   help: "Histogram of Particulate Matter of diameter less than 1 micron measurements"
   metric: "pm1_measurements"
+  metric_type: "histogram"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -51,6 +58,7 @@ pm1_hist:
 pm25:
   help: "Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)"
   metric: "PM25"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -58,6 +66,7 @@ pm25:
 pm25_hist:
   help: "Histogram of Particulate Matter of diameter less than 2.5 microns measurements"
   metric: "pm25_measurements"
+  metric_type: "histogram"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -65,6 +74,7 @@ pm25_hist:
 pm10:
   help: "Particulate Matter of diameter less than 10 microns. Measured in micrograms per cubic metre (ug/m3)"
   metric: "PM10"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -72,6 +82,7 @@ pm10:
 pm10_hist:
   help: "Histogram of Particulate Matter of diameter less than 10 microns measurements"
   metric: "pm10_measurements"
+  metric_type: "histogram"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -79,6 +90,7 @@ pm10_hist:
 nh3:
   help: "mostly Ammonia but could also include Hydrogen, Ethanol, Propane, Iso-butane (Ohms)"
   metric: "NH3"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -86,6 +98,7 @@ nh3:
 reducing:
   help: "Mostly carbon monoxide but could include H2S, Ammonia, Ethanol, Hydrogen, Methane, Propane, Iso-butane (Ohms)"
   metric: "reducing"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -93,6 +106,7 @@ reducing:
 oxidising:
   help: "Mostly nitrogen dioxide but could include NO and Hydrogen (Ohms)"
   metric: "oxidising"
+  metric_type: "gauge"
   namespace: ""
   variable_labels: []
   const_labels: []
