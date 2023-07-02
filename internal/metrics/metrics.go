@@ -18,13 +18,7 @@ type ExporterMetrics struct {
 
 	Pm10 *prometheus.Desc
 
-	Pm10_hist *prometheus.Desc
-
-	Pm1_hist *prometheus.Desc
-
 	Pm25 *prometheus.Desc
-
-	Pm25_hist *prometheus.Desc
 
 	Pressure *prometheus.Desc
 
@@ -37,6 +31,7 @@ type ExporterMetrics struct {
 
 func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 	return &ExporterMetrics{
+
 		Humidity: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "humidity"),
 			"humidity Relative humidity measured (%)",
@@ -79,30 +74,9 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 			nil,
 		),
 
-		Pm10_hist: prometheus.NewDesc(
-			prometheus.BuildFQName("", "", "pm10_measurements"),
-			"Histogram of Particulate Matter of diameter less than 10 microns measurements",
-			[]string{},
-			nil,
-		),
-
-		Pm1_hist: prometheus.NewDesc(
-			prometheus.BuildFQName("", "", "pm1_measurements"),
-			"Histogram of Particulate Matter of diameter less than 1 micron measurements",
-			[]string{},
-			nil,
-		),
-
 		Pm25: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "PM25"),
 			"Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)",
-			[]string{},
-			nil,
-		),
-
-		Pm25_hist: prometheus.NewDesc(
-			prometheus.BuildFQName("", "", "pm25_measurements"),
-			"Histogram of Particulate Matter of diameter less than 2.5 microns measurements",
 			[]string{},
 			nil,
 		),
@@ -138,6 +112,7 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 }
 
 func (m *ExporterMetrics) Describe(ch chan<- *prometheus.Desc) {
+
 	ch <- m.Humidity
 
 	ch <- m.Lux
