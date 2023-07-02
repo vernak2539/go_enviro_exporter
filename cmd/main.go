@@ -44,6 +44,7 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	humidity := c.sensors.bmxx80.GetHumidity()
 	pressure := c.sensors.bmxx80.GetPressure()
 	temp := c.sensors.bmxx80.GetTemperature()
+	gas := c.sensors.mics6814.GetGasMeasurements()
 
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.metrics.Proximity, prometheus.GaugeValue, proximity)
@@ -54,6 +55,9 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
 	ch <- prometheus.MustNewConstMetric(c.metrics.Pm25, prometheus.GaugeValue, float64(pm.Pm25Std))
 	ch <- prometheus.MustNewConstMetric(c.metrics.Pm10, prometheus.GaugeValue, float64(pm.Pm100Std))
+	ch <- prometheus.MustNewConstMetric(c.metrics.Oxidising, prometheus.GaugeValue, gas.Oxidising)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Reducing, prometheus.GaugeValue, gas.Reducing)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Nh3, prometheus.GaugeValue, gas.NH3)
 }
 
 var (
