@@ -18,7 +18,13 @@ type ExporterMetrics struct {
 
 	Pm10 *prometheus.Desc
 
+	Pm10_hist *prometheus.HistogramVec
+
+	Pm1_hist *prometheus.HistogramVec
+
 	Pm25 *prometheus.Desc
+
+	Pm25_hist *prometheus.HistogramVec
 
 	Pressure *prometheus.Desc
 
@@ -74,11 +80,41 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 			nil,
 		),
 
+		Pm10_hist: prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{
+				Name:        "Pm10_hist",
+				Help:        "Histogram of Particulate Matter of diameter less than 10 microns measurements",
+				ConstLabels: nil,
+				Buckets:     []float64{},
+			},
+			[]string{},
+		),
+
+		Pm1_hist: prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{
+				Name:        "Pm1_hist",
+				Help:        "Histogram of Particulate Matter of diameter less than 1 micron measurements",
+				ConstLabels: nil,
+				Buckets:     []float64{},
+			},
+			[]string{},
+		),
+
 		Pm25: prometheus.NewDesc(
 			prometheus.BuildFQName("", "", "PM25"),
 			"Particulate Matter of diameter less than 2.5 microns. Measured in micrograms per cubic metre (ug/m3)",
 			[]string{},
 			nil,
+		),
+
+		Pm25_hist: prometheus.NewHistogramVec(
+			prometheus.HistogramOpts{
+				Name:        "Pm25_hist",
+				Help:        "Histogram of Particulate Matter of diameter less than 2.5 microns measurements",
+				ConstLabels: nil,
+				Buckets:     []float64{},
+			},
+			[]string{},
 		),
 
 		Pressure: prometheus.NewDesc(
@@ -125,7 +161,13 @@ func (m *ExporterMetrics) Describe(ch chan<- *prometheus.Desc) {
 
 	ch <- m.Pm10
 
+	m.Pm10_hist.Describe(ch)
+
+	m.Pm1_hist.Describe(ch)
+
 	ch <- m.Pm25
+
+	m.Pm25_hist.Describe(ch)
 
 	ch <- m.Pressure
 
