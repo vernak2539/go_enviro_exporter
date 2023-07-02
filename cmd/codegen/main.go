@@ -22,6 +22,7 @@ type rawMetric struct {
 	Help           string   `json:"help"`
 	Type           string   `json:"type"`
 	Namespace      string   `json:"namespace"`
+	Buckets        string   `json:"buckets"`
 	ConstLabels    []string `json:"const_labels"`
 	VariableLabels []string `json:"variable_labels"`
 }
@@ -31,6 +32,7 @@ type metricData struct {
 	Metric         string
 	Type           string
 	Namespace      string
+	Buckets        string
 	Help           string
 	ConstLabels    []string
 	VariableLabels []string
@@ -67,6 +69,7 @@ func main() {
 			Metric:         m.Metric,
 			Type:           m.Type,
 			Namespace:      m.Namespace,
+			Buckets:        m.Buckets,
 			Help:           m.Help,
 			ConstLabels:    m.ConstLabels,
 			VariableLabels: m.VariableLabels,

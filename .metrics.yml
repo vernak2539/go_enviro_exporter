@@ -51,6 +51,7 @@ pm1_hist:
   help: "Histogram of Particulate Matter of diameter less than 1 micron measurements"
   metric: "pm1_measurements"
   type: "histogram"
+  buckets: "0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -67,6 +68,7 @@ pm25_hist:
   help: "Histogram of Particulate Matter of diameter less than 2.5 microns measurements"
   metric: "pm25_measurements"
   type: "histogram"
+  buckets: "0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100"
   namespace: ""
   variable_labels: []
   const_labels: []
@@ -83,6 +85,7 @@ pm10_hist:
   help: "Histogram of Particulate Matter of diameter less than 10 microns measurements"
   metric: "pm10_measurements"
   type: "histogram"
+  buckets: "0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100"
   namespace: ""
   variable_labels: []
   const_labels: []
