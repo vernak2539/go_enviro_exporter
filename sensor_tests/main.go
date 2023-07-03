@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/rubiojr/go-enviroplus/mics6814"
 	"log"
 	"time"
 
+	"github.com/rubiojr/go-enviroplus/mics6814"
 	"github.com/rubiojr/go-enviroplus/pms5003"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/conn/v3/physic"
