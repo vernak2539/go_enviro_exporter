@@ -30,7 +30,7 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 {{ if eq .Type "histogram" }}
     {{.Name}}: prometheus.NewHistogramVec(
         prometheus.HistogramOpts{
-            Name:        "{{.Name}}",
+            Name:        "{{.Metric}}",
             Help:        "{{.Help}}",
             ConstLabels: nil,
             Buckets:     []float64{ {{ .Buckets }} },

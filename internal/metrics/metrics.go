@@ -82,7 +82,7 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 
 		Pm10_hist: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:        "Pm10_hist",
+				Name:        "pm10_measurements",
 				Help:        "Histogram of Particulate Matter of diameter less than 10 microns measurements",
 				ConstLabels: nil,
 				Buckets:     []float64{0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100},
@@ -92,7 +92,7 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 
 		Pm1_hist: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:        "Pm1_hist",
+				Name:        "pm1_measurements",
 				Help:        "Histogram of Particulate Matter of diameter less than 1 micron measurements",
 				ConstLabels: nil,
 				Buckets:     []float64{0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100},
@@ -109,7 +109,7 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
 
 		Pm25_hist: prometheus.NewHistogramVec(
 			prometheus.HistogramOpts{
-				Name:        "Pm25_hist",
+				Name:        "pm25_measurements",
 				Help:        "Histogram of Particulate Matter of diameter less than 2.5 microns measurements",
 				ConstLabels: nil,
 				Buckets:     []float64{0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100},
