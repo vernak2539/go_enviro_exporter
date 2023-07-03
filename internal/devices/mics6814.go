@@ -4,6 +4,7 @@
 package mics6814
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -43,21 +44,28 @@ func (dev *Device) LastValue() Readings {
 func (dev *Device) StartReading() {
 	defer dev.Halt()
 
+	fmt.Println("StartReading")
+
 	for {
+		fmt.Println("StartReading - loop")
+
 		ox, err := dev.readPin(dev.oxPin)
 		if err != nil {
 			dev.log.Error().Err(err)
 		}
+		fmt.Printf("StartReading - loop - %2.2f\n", ox)
 
 		red, err := dev.readPin(dev.redPin)
 		if err != nil {
 			dev.log.Error().Err(err)
 		}
+		fmt.Printf("StartReading - loop - %2.2f\n", red)
 
 		nh3, err := dev.readPin(dev.nh3Pin)
 		if err != nil {
 			dev.log.Error().Err(err)
 		}
+		fmt.Printf("StartReading - loop - %2.2f\n", nh3)
 
 		dev.lastRead = Readings{
 			Oxidising: ox,
