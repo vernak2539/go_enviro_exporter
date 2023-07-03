@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/rubiojr/go-enviroplus/mics6814"
 	"log"
 	"time"
 
@@ -41,6 +42,16 @@ func main() {
 		particulateMatterSensor.StartReading()
 	}()
 
+	gasDev, err := mics6814.New()
+	if err != nil {
+		panic(err)
+	}
+	defer gasDev.Halt()
+
+	go func() {
+		gasDev.StartReading()
+	}()
+
 	for {
 		pm := particulateMatterSensor.LastValue()
 		if err = dev.Sense(&e); err != nil {
@@ -74,6 +85,13 @@ func main() {
 		fmt.Println("2.5um 1 0.1L air:                               ", pm.Particles25um)
 		fmt.Println("5um 1 0.1L air:                                 ", pm.Particles50um)
 		fmt.Println("10um 1 0.1L air:                                ", pm.Particles100um)
+		fmt.Println()
+		fmt.Println()
+
+		fmt.Printf("Oxidising: %.2f\n", gasDev.LastValue().Oxidising)
+		fmt.Printf("Reducing:  %.2f\n", gasDev.LastValue().Reducing)
+		fmt.Printf("NH3:       %.2f\n", gasDev.LastValue().NH3)
+
 		fmt.Println()
 		fmt.Println()
 
