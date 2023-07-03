@@ -7,13 +7,19 @@ import (
 
 type ExporterMetrics struct {
 {{- range .Metrics }}
+{{ if eq .Type "gauge" }}
   {{.Name}} *prometheus.Desc
+{{ end }}
+{{ if eq .Type "histogram" }}
+  {{.Name}} *prometheus.HistogramVec
+{{ end }}
 {{ end }}
 }
 
 func CreateExporterMetricPromDescriptors() *ExporterMetrics {
   return &ExporterMetrics{
 {{- range .Metrics }}
+{{ if eq .Type "gauge" }}
     {{.Name}}: prometheus.NewDesc(
         prometheus.BuildFQName("{{.Namespace}}", "", "{{.Metric}}"),
         "{{.Help}}",
@@ -21,11 +27,28 @@ func CreateExporterMetricPromDescriptors() *ExporterMetrics {
         nil,
     ),
 {{ end }}
+{{ if eq .Type "histogram" }}
+    {{.Name}}: prometheus.NewHistogramVec(
+        prometheus.HistogramOpts{
+            Name:        "{{.Metric}}",
+            Help:        "{{.Help}}",
+            ConstLabels: nil,
+            Buckets:     []float64{ {{ .Buckets }} },
+        },
+        []string{},
+    ),
+{{ end }}
+{{ end }}
   }
 }
 
 func (m *ExporterMetrics) Describe(ch chan<- *prometheus.Desc) {
 {{- range .Metrics }}
+{{ if eq .Type "gauge" }}
   ch <- m.{{.Name}}
+{{ end }}
+{{ if eq .Type "histogram" }}
+  m.{{.Name}}.Describe(ch)
+{{ end }}
 {{ end }}
 }

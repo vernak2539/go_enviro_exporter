@@ -46,7 +46,9 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	temp := c.sensors.bmxx80.GetTemperature()
 	gas := c.sensors.mics6814.GetGasMeasurements()
 
-	pmHistBuckets := map[float64]uint64{0: 0, 5: 5, 10: 10, 15: 15, 20: 20, 25: 25, 30: 30, 35: 35, 40: 40, 45: 45, 50: 50, 55: 55, 60: 60, 65: 65, 70: 70, 75: 75, 80: 80, 85: 85, 90: 90, 95: 95, 100: 100}
+	pm1Std64 := float64(pm.Pm10Std)
+	pm25Std64 := float64(pm.Pm25Std)
+	pm100Std64 := float64(pm.Pm100Std)
 
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.metrics.Proximity, prometheus.GaugeValue, proximity)
@@ -54,15 +56,21 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	ch <- prometheus.MustNewConstMetric(c.metrics.Pressure, prometheus.GaugeValue, pressure)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Humidity, prometheus.GaugeValue, humidity)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Temperature, prometheus.GaugeValue, temp)
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm25, prometheus.GaugeValue, float64(pm.Pm25Std))
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm10, prometheus.GaugeValue, float64(pm.Pm100Std))
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, pm1Std64)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm25, prometheus.GaugeValue, pm25Std64)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm10, prometheus.GaugeValue, pm100Std64)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Oxidising, prometheus.GaugeValue, gas.Oxidising)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Reducing, prometheus.GaugeValue, gas.Reducing)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Nh3, prometheus.GaugeValue, gas.NH3)
-	ch <- prometheus.MustNewConstHistogram(c.metrics.Pm1_hist, uint64(pm.Pm10Std), float64(pm.Pm10Std), pmHistBuckets)
-	ch <- prometheus.MustNewConstHistogram(c.metrics.Pm25_hist, uint64(pm.Pm25Std), float64(pm.Pm25Std) - float64(pm.Pm10Std), pmHistBuckets)
-	ch <- prometheus.MustNewConstHistogram(c.metrics.Pm10_hist, uint64(pm.Pm100Std), float64(pm.Pm100Std) - float64(pm.Pm25Std), pmHistBuckets)
+
+	c.metrics.Pm1_hist.WithLabelValues().Observe(pm1Std64)
+	c.metrics.Pm1_hist.Collect(ch)
+
+	c.metrics.Pm25_hist.WithLabelValues().Observe(pm25Std64)
+	c.metrics.Pm25_hist.Collect(ch)
+
+	c.metrics.Pm10_hist.WithLabelValues().Observe(pm100Std64)
+	c.metrics.Pm10_hist.Collect(ch)
 }
 
 var (

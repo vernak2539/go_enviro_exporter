@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"flag"
 	"go/format"
+	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -19,7 +20,9 @@ import (
 type rawMetric struct {
 	Metric         string   `json:"metric"`
 	Help           string   `json:"help"`
+	Type           string   `json:"type"`
 	Namespace      string   `json:"namespace"`
+	Buckets        string   `json:"buckets"`
 	ConstLabels    []string `json:"const_labels"`
 	VariableLabels []string `json:"variable_labels"`
 }
@@ -27,7 +30,9 @@ type rawMetric struct {
 type metricData struct {
 	Name           string
 	Metric         string
+	Type           string
 	Namespace      string
+	Buckets        string
 	Help           string
 	ConstLabels    []string
 	VariableLabels []string
@@ -47,7 +52,7 @@ func main() {
 	flag.StringVar(&args.pkg, "pkg", "metrics", "package name")
 	flag.Parse()
 
-	data, err := os.ReadFile(args.src)
+	data, err := ioutil.ReadFile(args.src)
 	if err != nil {
 		log.Fatalln("unable to open file:", err)
 	}
@@ -62,7 +67,9 @@ func main() {
 		metrics = append(metrics, metricData{
 			Name:           strings.Title(entry),
 			Metric:         m.Metric,
+			Type:           m.Type,
 			Namespace:      m.Namespace,
+			Buckets:        m.Buckets,
 			Help:           m.Help,
 			ConstLabels:    m.ConstLabels,
 			VariableLabels: m.VariableLabels,
