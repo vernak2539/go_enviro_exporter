@@ -46,18 +46,31 @@ func (c *environmentMetricCollector) Collect(ch chan<- prometheus.Metric) {
 	temp := c.sensors.bmxx80.GetTemperature()
 	gas := c.sensors.mics6814.GetGasMeasurements()
 
+	pm1Std64 := float64(pm.Pm10Std)
+	pm25Std64 := float64(pm.Pm25Std)
+	pm100Std64 := float64(pm.Pm100Std)
+
 	// labels added here if needed
 	ch <- prometheus.MustNewConstMetric(c.metrics.Proximity, prometheus.GaugeValue, proximity)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Lux, prometheus.GaugeValue, lux)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Pressure, prometheus.GaugeValue, pressure)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Humidity, prometheus.GaugeValue, humidity)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Temperature, prometheus.GaugeValue, temp)
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, float64(pm.Pm10Std))
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm25, prometheus.GaugeValue, float64(pm.Pm25Std))
-	ch <- prometheus.MustNewConstMetric(c.metrics.Pm10, prometheus.GaugeValue, float64(pm.Pm100Std))
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm1, prometheus.GaugeValue, pm1Std64)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm25, prometheus.GaugeValue, pm25Std64)
+	ch <- prometheus.MustNewConstMetric(c.metrics.Pm10, prometheus.GaugeValue, pm100Std64)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Oxidising, prometheus.GaugeValue, gas.Oxidising)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Reducing, prometheus.GaugeValue, gas.Reducing)
 	ch <- prometheus.MustNewConstMetric(c.metrics.Nh3, prometheus.GaugeValue, gas.NH3)
+
+	c.metrics.Pm1_hist.WithLabelValues().Observe(pm1Std64)
+	c.metrics.Pm1_hist.Collect(ch)
+
+	c.metrics.Pm25_hist.WithLabelValues().Observe(pm25Std64)
+	c.metrics.Pm25_hist.Collect(ch)
+
+	c.metrics.Pm10_hist.WithLabelValues().Observe(pm100Std64)
+	c.metrics.Pm10_hist.Collect(ch)
 }
 
 var (
