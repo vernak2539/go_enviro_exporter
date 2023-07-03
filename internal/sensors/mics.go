@@ -1,8 +1,6 @@
 package sensors
 
-import (
-	"github.com/rubiojr/go-enviroplus/mics6814"
-)
+import mics6814 "github.com/vernak2539/go_enviro_exporter/internal/devices"
 
 // This is the MICS6814 sensor. Measure changes in the concentration of gases including carbon monoxide (CO),
 // nitrogen dioxide (NO2), and ammonia (NH3) with this Breakout Garden compatible I2C breakout.

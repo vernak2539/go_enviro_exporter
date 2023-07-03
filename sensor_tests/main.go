@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/rubiojr/go-enviroplus/mics6814"
 	"github.com/rubiojr/go-enviroplus/pms5003"
+	mics6814 "github.com/vernak2539/go_enviro_exporter/internal/devices"
 	"periph.io/x/conn/v3/i2c/i2creg"
 	"periph.io/x/conn/v3/physic"
 	"periph.io/x/devices/v3/bmxx80"
